@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>挙手アプリ</title>
+</head>
+<body>
+  <h1>挙手フォーム</h1>
+  <form id="handForm">
+    <label>授業を選択：</label>
+    <select id="classId">
+      <option value="webp">Webプログラミング</option>
+    </select><br><br>
+
+    <label>学籍番号：</label>
+    <input type="text" id="studentId" required><br><br>
+
+    <label>質問内容：</label>
+    <textarea id="question" required></textarea><br><br>
+
+    <button type="submit">挙手する</button>
+  </form>
+
+  <script src="app.js"></script>
+</body>
+</html>
