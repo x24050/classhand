@@ -1,6 +1,7 @@
 import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
+console.log("Webhook URL:", process.env.WEBHOOK_URL);
 
 dotenv.config();
 
