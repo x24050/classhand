@@ -1,18 +1,31 @@
-import fetch from "node-fetch";
+// api/raise-hand.js
 
 export default async function handler(req, res) {
+  // メソッドチェック
   if (req.method !== "POST") {
     return res.status(405).send("Method not allowed");
   }
 
-  const { name, id, question } = req.body;
+  // ボディ取得
+  const { studentId, question } = req.body || {};
+  if (!studentId || !question) {
+    return res.status(400).json({ error: "Missing fields" });
+  }
 
+  // 環境変数チェック
+  const webhookUrl = process.env.WEBHOOK_URL;
+  if (!webhookUrl) {
+    console.error("WEBHOOK_URL is missing!");
+    return res.status(500).send("Server configuration error");
+  }
+
+  // Teamsに送信
   try {
-    const response = await fetch(process.env.WEBHOOK_URL, {
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        text: `🙋‍♀️ ${name} (${id}) が挙手しました！\n質問内容: ${question}`,
+        text: `🙋‍♀️ 学籍番号: ${studentId}, 質問: ${question}`
       }),
     });
 
@@ -22,9 +35,9 @@ export default async function handler(req, res) {
       return res.status(500).send("Teams webhook failed");
     }
 
-    res.status(200).json({ message: "OK" });
+    return res.status(200).json({ message: "Sent to Teams!" });
   } catch (err) {
-    console.error("Webhook send error:", err);
-    res.status(500).send("Webhook send error");
+    console.error("Exception:", err);
+    return res.status(500).send("Server error");
   }
 }
