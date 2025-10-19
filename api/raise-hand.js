@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   // 環境変数チェック
-  const webhookUrl = process.env.WEBHOOK_URL;
+  const webhookUrl = process.env.WEBP_WEBHOOK;
   if (!webhookUrl) {
     console.error("WEBHOOK_URL is missing!");
     return res.status(500).send("Server configuration error");
