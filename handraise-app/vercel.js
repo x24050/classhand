@@ -1,11 +1,17 @@
+// vercel.json
+
 {
   "version": 2,
   "builds": [
-    { "src": "server.js", "use": "@vercel/node" },
-    { "src": "public/**/*", "use": "@vercel/static" }
+    {
+      "src": "api/raise-hand.js",
+      "use": "@vercel/node"
+    }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/server.js" },
-    { "src": "/(.*)", "dest": "/public/$1" }
+    {
+      "src": "/api/raise-hand",
+      "dest": "/api/raise-hand.js"
+    }
   ]
 }
