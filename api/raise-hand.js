@@ -1,13 +1,16 @@
 export default async function handler(req, res) {
+  // POSTメソッド以外は拒否
   if (req.method !== "POST") {
     return res.status(405).send("Method not allowed");
   }
 
-  const { studentId, question, imgBase64 } = req.body || {};
+  // リクエストボディの取得
+  const { studentId, question } = req.body || {};
   if (!studentId || !question) {
     return res.status(400).json({ error: "Missing fields" });
   }
 
+  // 環境変数チェック
   const webhookUrl = process.env.WEBP_WEBHOOK;
   if (!webhookUrl) {
     console.error("WEBHOOK_URL is missing!");
@@ -15,19 +18,22 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Teamsに送信するメッセージ内容
     const payload = {
       "@type": "MessageCard",
       "@context": "https://schema.org/extensions",
       summary: `${studentId}が挙手しました`,
+      themeColor: "0076D7",
+      title: "🙋‍♀️ 挙手通知",
       sections: [
         {
-          activityTitle: `🙋‍♀️ 学籍番号: ${studentId}`,
-          text: `💬 質問: ${question}`,
-          images: [{ image: imgBase64 }],
+          activityTitle: `学籍番号: **${studentId.toUpperCase()}**`,
+          text: `💬 **質問内容:** ${question}`,
         },
       ],
     };
 
+    // Teams WebhookにPOST
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
