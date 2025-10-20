@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+/*export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).send("Method not allowed");
   }
@@ -59,4 +59,4 @@ export default async function handler(req, res) {
     console.error("Exception:", err);
     return res.status(500).send("Server error");
   }
-}
+}*/
