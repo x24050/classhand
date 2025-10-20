@@ -1,10 +1,18 @@
-const express = require("express");
-const fetch = require("node-fetch"); // Vercelではfetch未定義な場合があるので明示的に
-require("dotenv").config();
+import express from "express";
+import fetch from "node-fetch";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(express.static("public"));
 
+// server.js
+
+// ... (省略: import, dotenv.config(), app.use の部分)
+
+// 授業ごとのWebhookマッピング
 const webhookMap = {
   webp: process.env.WEBP_WEBHOOK
 };
@@ -15,16 +23,21 @@ app.post("/api/raise-hand", async (req, res) => {
   const webhookUrl = webhookMap[classId];
 
   if (!webhookUrl) return res.status(400).send("無効な授業です");
-
+  
+  // 1. 座席表ページのリンクを生成
+  // BASE_URL環境変数を使用し、クエリパラメータに学籍番号と質問内容を含めます
   const baseURL = process.env.BASE_URL; 
   if (!baseURL) {
-    console.error("BASE_URL環境変数が設定されていません。");
-    return res.status(500).send("サーバー設定エラー: BASE_URLが未設定です。");
+      console.error("BASE_URL環境変数が設定されていません。");
+      return res.status(500).send("サーバー設定エラー: BASE_URLが未設定です。");
   }
 
+  // 質問内容をURLエンコードします
   const encodedQuestion = encodeURIComponent(question);
+  // 新しく作成する座席表ページ (seatmap.html) へのリンク
   const seatmapLink = `${baseURL}/seatmap.html?studentId=${studentId}&question=${encodedQuestion}`;
 
+  // 2. Teamsのメッセージカードを更新
   const message = {
     "@type": "MessageCard",
     "@context": "https://schema.org/extensions",
@@ -45,6 +58,7 @@ app.post("/api/raise-hand", async (req, res) => {
       }
     ]
   };
+
   try {
     await fetch(webhookUrl, {
       method: "POST",
@@ -58,5 +72,6 @@ app.post("/api/raise-hand", async (req, res) => {
   }
 });
 
-// 🔽 Vercelでは app.listen() は不要、代わりにエクスポート
-module.exports = app;
+app.listen(3000, "0.0.0.0", () =>
+  console.log("Server running on http://localhost:3000")
+);
