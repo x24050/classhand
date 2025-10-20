@@ -1,8 +1,4 @@
-// server.js
 
-// ... (省略: import, dotenv.config(), app.use の部分)
-
-// 授業ごとのWebhookマッピング
 const webhookMap = {
   webp: process.env.WEBP_WEBHOOK
 };
