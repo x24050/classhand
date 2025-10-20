@@ -1,55 +1,48 @@
-import express from "express";
-import fetch from "node-fetch";
-import dotenv from "dotenv";
+// server.js
 
-dotenv.config();
-
-const app = express();
-app.use(express.json());
-app.use(express.static("public"));
+// ... (省略: import, dotenv.config(), app.use の部分)
 
 // 授業ごとのWebhookマッピング
 const webhookMap = {
-  webp: process.env.WEBP_WEBHOOK,
-  // 他の授業IDを追加したい場合はここに追加
+  webp: process.env.WEBP_WEBHOOK
 };
 
 // 挙手API
 app.post("/api/raise-hand", async (req, res) => {
   const { classId, studentId, question } = req.body;
-
-  // 授業IDチェック
   const webhookUrl = webhookMap[classId];
-  if (!webhookUrl) return res.status(400).send("無効な授業です");
 
-  // BASE_URL確認（座席表ページのリンク用）
-  const baseURL = process.env.BASE_URL;
+  if (!webhookUrl) return res.status(400).send("無効な授業です");
+  
+  // 1. 座席表ページのリンクを生成
+  // BASE_URL環境変数を使用し、クエリパラメータに学籍番号と質問内容を含めます
+  const baseURL = process.env.BASE_URL; 
   if (!baseURL) {
-    console.error("BASE_URL環境変数が設定されていません。");
-    return res.status(500).send("サーバー設定エラー: BASE_URLが未設定です。");
+      console.error("BASE_URL環境変数が設定されていません。");
+      return res.status(500).send("サーバー設定エラー: BASE_URLが未設定です。");
   }
 
-  // URLエンコードした質問内容
+  // 質問内容をURLエンコードします
   const encodedQuestion = encodeURIComponent(question);
-  // seatmap.html へのリンク生成
+  // 新しく作成する座席表ページ (seatmap.html) へのリンク
   const seatmapLink = `${baseURL}/seatmap.html?studentId=${studentId}&question=${encodedQuestion}`;
 
-  // Teams メッセージカード作成
+  // 2. Teamsのメッセージカードを更新
   const message = {
     "@type": "MessageCard",
     "@context": "https://schema.org/extensions",
-    summary: `挙手通知: ${studentId}`,
-    themeColor: "DC143C", // 赤系統で目立たせる
-    title: `🔴 挙手通知: ${studentId}`,
-    text: `**学籍番号:** ${studentId}\n**質問:** ${question}`,
-    potentialAction: [
+    "summary": "新しい挙手",
+    "themeColor": "DC143C", // ハイライトに合わせて赤系統に変更
+    "title": `🔴 挙手通知: ${studentId}`,
+    "text": `**学籍番号:** ${studentId}\n**質問:** ${question}`,
+    "potentialAction": [ // リンクをボタンとして追加
       {
         "@type": "OpenUri",
-        name: "座席表で確認する",
-        targets: [
+        "name": "座席表で確認する",
+        "targets": [
           {
-            os: "default",
-            uri: seatmapLink
+            "os": "default",
+            "uri": seatmapLink // 生成したリンクを埋め込む
           }
         ]
       }
@@ -57,28 +50,18 @@ app.post("/api/raise-hand", async (req, res) => {
   };
 
   try {
-    // Teamsに送信
-    const response = await fetch(webhookUrl, {
+    await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(message)
     });
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("Teams webhook error:", text);
-      return res.status(500).send("Teamsへの通知に失敗しました");
-    }
-
-    res.status(200).json({ message: "挙手通知送信成功", seatmapLink });
+    res.sendStatus(200);
   } catch (err) {
-    console.error("Exception:", err);
+    console.error(err);
     res.status(500).send("Teamsへの通知に失敗しました");
   }
 });
 
-// サーバー起動
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+app.listen(3000, "0.0.0.0", () =>
+  console.log("Server running on http://localhost:3000")
+);
