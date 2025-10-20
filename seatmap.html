@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>座席表 (挙手確認)</title>
+  <link rel="stylesheet" href="./style.css"> 
+  <style>
+    /* ... 既存のスタイル ... */
+    
+    /* ★ 修正点: コンテナを中央に配置し、幅を座席表の最大幅に合わせる */
+    .container {
+        max-width: 1200px; /* .seat-map-container の max-width と合わせる */
+        margin: 0 auto;    /* 中央寄せ */
+        padding: 20px;
+        background-color: #f8f9fa; /* 背景色を設定してボックスの境界を分かりやすくする */
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* seatmap専用のスタイル */
+    .seat-map-container {
+      /* ★ 修正点: 外側の margin を除去し、.container の中央寄せに任せる */
+      display: grid;
+      grid-template-columns: repeat(12, 1fr); 
+      gap: 10px; 
+      padding: 30px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 100%; /* 親要素 (1200px) の幅を最大限使う */
+      margin: 0; /* 中央寄せを解除 */
+    }
+    
+    /* ... 既存のスタイルの続き ... */
+    .seat {
+      background-color: #e0e0e0;
+      color: #333;
+      padding: 15px 5px; /* パディングを調整 */
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+      border: 2px solid #ccc;
+      position: relative;
+      font-size: 0.9rem;
+    }
+    /* ★ 新規: 空席のスタイル */
+    .empty-seat {
+      background-color: #dee2e6 !important; /* 灰色 */
+      color: #adb5bd;
+      cursor: default;
+      border-color: #adb5bd;
+      box-shadow: none;
+      animation: none;
+      transform: none;
+      pointer-events: none; /* クリック無効化 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .empty-seat:hover {
+        background-color: #dee2e6;
+    }
+    
+    /* 質問中の席のハイライトスタイル (既存) */
+    .seat.highlighted {
+      background-color: #ff4d4f; /* 赤色でハイライト */
+      color: white;
+      border-color: #ff4d4f;
+      animation: pulse 1s infinite alternate;
+      box-shadow: 0 0 10px rgba(255, 77, 79, 0.8);
+    }
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+    .seat-label {
+      font-size: 0.7rem; /* 文字サイズを調整 */
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      opacity: 0.7;
+    }
+    .seat.highlighted .seat-label {
+        color: white;
+    }
+    /* 教卓 (既存) */
+    .desk {
+      grid-column: 1 / -1; /* 全幅を使用 */
+      background-color: #1a73e8;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      border-radius: 6px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    
+    /* ポップアップ/モーダルスタイル (既存) */
+    #questionModal {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none; 
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 8px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        position: relative;
+    }
+    .modal-content h3 {
+        color: #1a73e8;
+        margin-top: 0;
+        border-bottom: 2px solid #e8f0fe;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    .modal-content p {
+        white-space: pre-wrap; 
+    }
+    .close-button {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        background: none;
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="logo-class">Class</span><span class="logo-hand">Hand</span> | 座席表
+            </h1>
+        </header>
+        <div class="seat-map-container" id="seatMap">
+            <div class="desk">教卓 / スクリーン</div>
+            
+<div class="empty-seat"> </div>
+<div class="empty-seat"> </div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24070">x24070</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24056">x24056</div>
+<div class="seat" data-studentid="x24104">x24104</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24026">x24026</div>
+<div class="empty-seat"> </div>
+<div class="empty-seat"> </div>
+<div class="empty-seat"> </div>
+
+<div class="seat" data-studentid="x24105">x24105</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24090">x24090</div>
+<div class="seat" data-studentid="x24071">x24071</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24057">x24057</div>
+<div class="seat" data-studentid="x24043">x24043</div>
+<div class="empty-seat"> </div> <div class="seat" data-studentid="x24027">x24027</div>
+<div class="seat" data-studentid="x24088">x24088</div> <div class="seat" data-studentid="x24074">x24074</div>
+<div class="seat" data-studentid="x24042">x24042</div>
+
+<div class="seat" data-studentid="x24231">x24231</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24091">x24091</div>
+<div class="seat" data-studentid="x24073">x24073</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24058">x24058</div>
+<div class="seat" data-studentid="x24045">x24045</div>
+<div class="empty-seat"> </div> <div class="seat" data-studentid="x24028">x24028</div> 
+<div class="seat" data-studentid="x24015">x24015</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24002">x24002</div>
+
+<div class="seat" data-studentid="x24232">x24232</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24093">x24093</div>
+<div class="empty-seat"> </div> <div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24059">x24059</div>
+<div class="seat" data-studentid="x24046">x24046</div>
+<div class="empty-seat"> </div> <div class="seat" data-studentid="x24029">x24029</div>
+<div class="seat" data-studentid="x24016">x24016</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24004">x24004</div>
+
+<div class="seat" data-studentid="x21031">x21031</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24094">x24094</div>
+<div class="seat" data-studentid="x24076">x24076</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24060">x24060</div>
+<div class="seat" data-studentid="x24047">x24047</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24030">x24030</div>
+<div class="seat" data-studentid="x24017">x24017</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24005">x24005</div>
+
+<div class="seat" data-studentid="x22015">x22015</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24095">x24095</div>
+<div class="seat" data-studentid="x24077">x24077</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24061">x24061</div>
+<div class="seat" data-studentid="x24048">x24048</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24031">x24031</div>
+<div class="seat" data-studentid="x24018">x24018</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24006">x24006</div>
+
+<div class="seat" data-studentid="x22068">x22068</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24096">x24096</div>
+<div class="seat" data-studentid="x24079">x24079</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24062">x24062</div>
+<div class="seat" data-studentid="x24049">x24049</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24033">x24033</div>
+<div class="seat" data-studentid="x24019">x24019</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24007">x24007</div>
+
+<div class="seat" data-studentid="x23017">x23017</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24098">x24098</div>
+<div class="seat" data-studentid="x24082">x24082</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24063">x24063</div>
+<div class="seat" data-studentid="x24050">x24050</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24035">x24035</div>
+<div class="seat" data-studentid="x24020">x24020</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24008">x24008</div>
+
+<div class="seat" data-studentid="x22019">x22019</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24099">x24099</div>
+<div class="seat" data-studentid="x24084">x24084</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24064">x24064</div>
+<div class="seat" data-studentid="x24051">x24051</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24036">x24036</div>
+<div class="seat" data-studentid="x24021">x24021</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24010">x24010</div>
+
+<div class="seat" data-studentid="x21008">x21008</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24100">x24100</div>
+<div class="seat" data-studentid="x24085">x24085</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24065">x24065</div>
+<div class="seat" data-studentid="x24052">x24052</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24037">x24037</div>
+<div class="seat" data-studentid="x24022">x24022</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24011">x24011</div>
+
+<div class="seat" data-studentid="x21051">x21051</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24101">x24101</div>
+<div class="seat" data-studentid="x24086">x24086</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24068">x24068</div>
+<div class="seat" data-studentid="x24054">x24054</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24038">x24038</div>
+<div class="seat" data-studentid="x24023">x24023</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24012">x24012</div>
+
+<div class="seat" data-studentid="x21052">x21052</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24102">x24102</div>
+<div class="seat" data-studentid="x24087">x24087</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24069">x24069</div>
+<div class="seat" data-studentid="x24055">x24055</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24040">x24040</div>
+<div class="seat" data-studentid="x24024">x24024</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24013">x24013</div>
+
+<div class="seat" data-studentid="x21075">x21075</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24103">x24103</div>
+<div class="empty-seat"> </div>
+<div class="empty-seat"> </div>
+<div class="empty-seat"> </div>
+<div class="empty-seat"> </div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24041">x24041</div>
+<div class="seat" data-studentid="x24025">x24025</div>
+<div class="empty-seat"> </div>
+<div class="seat" data-studentid="x24014">x24014</div>
+        </div>
+
+        <div id="questionModal">
+            <div class="modal-content">
+                <button class="close-button" onclick="document.getElementById('questionModal').style.display='none'">&times;</button>
+                <h3>質問内容 (<span id="modal-student-id"></span>)</h3>
+                <p id="modal-question-text"></p>
+            </div>
+        </div>
+
+    </div>
+    <script src="./seatmap.js"></script>
+</body>
+</html>
