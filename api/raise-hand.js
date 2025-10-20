@@ -1,32 +1,40 @@
-// api/raise-hand.js
+import fetch from "node-fetch";
 
 export default async function handler(req, res) {
-  // メソッドチェック
   if (req.method !== "POST") {
     return res.status(405).send("Method not allowed");
   }
 
-  // ボディ取得
-  const { studentId, question } = req.body || {};
+  const { studentId, question, imgBase64 } = req.body || {};
   if (!studentId || !question) {
     return res.status(400).json({ error: "Missing fields" });
   }
 
-  // 環境変数チェック
   const webhookUrl = process.env.WEBP_WEBHOOK;
   if (!webhookUrl) {
     console.error("WEBHOOK_URL is missing!");
     return res.status(500).send("Server configuration error");
   }
 
-  // Teamsに送信
   try {
+    // Teamsに送信（画像をBase64で直接埋め込み）
+    const payload = {
+      "@type": "MessageCard",
+      "@context": "https://schema.org/extensions",
+      summary: `${studentId}が挙手しました`,
+      sections: [
+        {
+          activityTitle: `🙋‍♀️ 学籍番号: ${studentId}`,
+          text: `💬 質問: ${question}`,
+          images: [{ image: imgBase64 }],
+        },
+      ],
+    };
+
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: `🙋‍♀️ 学籍番号: ${studentId}, 質問: ${question}`
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
