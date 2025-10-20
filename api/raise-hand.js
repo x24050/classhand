@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).send("Method not allowed");
@@ -17,7 +15,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Teamsに送信（画像をBase64で直接埋め込み）
     const payload = {
       "@type": "MessageCard",
       "@context": "https://schema.org/extensions",
