@@ -26,20 +26,43 @@ app.post("/api/raise-hand", async (req, res) => {
   const seatmapLink = `${baseURL}/seatmap.html?studentId=${studentId}&question=${encodedQuestion}`;
 
   const message = {
-    "@type": "MessageCard",
-    "@context": "https://schema.org/extensions",
-    "summary": "新しい挙手",
-    "themeColor": "DC143C",
-    "title": `🔴 挙手通知: ${studentId}`,
-    "text": `**学籍番号:** ${studentId}\n**質問:** ${question}`,
-    "potentialAction": [
-      {
-        "@type": "OpenUri",
-        "name": "座席表で確認する",
-        "targets": [{ "os": "default", "uri": seatmapLink }]
+  type: "message",
+  attachments: [
+    {
+      contentType: "application/vnd.microsoft.card.adaptive",
+      content: {
+        type: "AdaptiveCard",
+        version: "1.5",
+        body: [
+          {
+            type: "TextBlock",
+            text: `🔴 挙手通知: ${studentId}`,
+            weight: "Bolder",
+            size: "Large",
+            color: "Attention"
+          },
+          {
+            type: "TextBlock",
+            text: `**学籍番号:** ${studentId}`,
+            wrap: true
+          },
+          {
+            type: "TextBlock",
+            text: `**質問:** ${question}`,
+            wrap: true
+          }
+        ],
+        actions: [
+          {
+            type: "Action.OpenUrl",
+            title: "座席表で確認する",
+            url: seatmapLink
+          }
+        ]
       }
-    ]
-  };
+    }
+  ]
+};
 
   try {
     await fetch(webhookUrl, {
